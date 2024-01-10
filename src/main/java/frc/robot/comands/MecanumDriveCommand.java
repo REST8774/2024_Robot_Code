@@ -2,7 +2,7 @@
 
 package frc.robot.comands;
 
-import frc.robot.MecanumDriveSubsystem;
+import frc.robot.subsystems.MecanumDriveSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 
