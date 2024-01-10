@@ -1,20 +1,29 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// RobotContainer.java
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class RobotContainer {
-  public RobotContainer() {
-    configureBindings();
-  }
+    private final MecanumDriveSubsystem m_driveSubsystem;
+    private final MecanumDriveCommand m_driveCommand;
 
-  private void configureBindings() {}
+    public RobotContainer() {
+        m_driveSubsystem = new MecanumDriveSubsystem();
+        m_driveCommand = new MecanumDriveCommand(m_driveSubsystem, new Joystick(0));
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
-  }
+        configureButtonBindings();
+        CommandScheduler.getInstance().setDefaultCommand(m_driveSubsystem, m_driveCommand);
+    }
+
+    private void configureButtonBindings() {
+        // Add any button bindings here if needed
+    }
+
+    public Command getAutonomousCommand() {
+        // Return your autonomous command here if needed
+        return null;
+    }
 }
