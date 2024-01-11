@@ -15,21 +15,28 @@ import frc.robot.Helpers;
 import frc.robot.subsystems.leds.LEDs;
 
 public class Intake extends Subsystem {
+  // PID controller constants for the pivot motor
   private static final double k_pivotMotorP = 0.12;
   private static final double k_pivotMotorI = 0.0;
   private static final double k_pivotMotorD = 0.001;
 
+  // PID controller for the pivot motor
   private final PIDController m_pivotPID = new PIDController(k_pivotMotorP, k_pivotMotorI, k_pivotMotorD);
 
+  // Duty cycle encoder for the pivot motor
   private final DutyCycleEncoder m_pivotEncoder = new DutyCycleEncoder(Constants.Intake.k_pivotEncoderId);
+
+  // Limit switch for the intake
   private final DigitalInput m_IntakeLimitSwitch = new DigitalInput(Constants.Intake.k_intakeLimitSwitchId);
 
+  // LEDs instance for controlling LED colors
   public final LEDs m_leds = LEDs.getInstance();
 
   /*-------------------------------- Private instance variables ---------------------------------*/
   private static Intake mInstance;
   private PeriodicIO m_periodicIO;
 
+  // Singleton pattern for the Intake subsystem
   public static Intake getInstance() {
     if (mInstance == null) {
       mInstance = new Intake();
@@ -40,6 +47,7 @@ public class Intake extends Subsystem {
   private CANSparkMax mIntakeMotor;
   private CANSparkMax mPivotMotor;
 
+  // Private constructor for the singleton pattern
   private Intake() {
     mIntakeMotor = new CANSparkMax(Constants.Intake.kIntakeMotorId, MotorType.kBrushless);
     mIntakeMotor.restoreFactoryDefaults();
@@ -63,6 +71,7 @@ public class Intake extends Subsystem {
     double intake_power = 0.0;
   }
 
+  // Enum for defining pivot target positions
   public enum PivotTarget {
     NONE,
     GROUND,
@@ -71,6 +80,7 @@ public class Intake extends Subsystem {
     STOW
   }
 
+  // Enum for defining intake states
   public enum IntakeState {
     NONE,
     INTAKE,
@@ -130,6 +140,7 @@ public class Intake extends Subsystem {
   public void reset() {
   }
 
+  // Function to convert pivot target to pivot angle
   public double pivotTargetToAngle(PivotTarget target) {
     switch (target) {
       case GROUND:
@@ -146,6 +157,7 @@ public class Intake extends Subsystem {
     }
   }
 
+  // Function to convert intake state to intake motor speed
   public double intakeStateToSpeed(IntakeState state) {
     switch (state) {
       case INTAKE:
@@ -169,10 +181,12 @@ public class Intake extends Subsystem {
 
   /*---------------------------------- Custom Public Functions ----------------------------------*/
 
+  // Getter function for intake state
   public IntakeState getIntakeState() {
     return m_periodicIO.intake_state;
   }
 
+  // Getter function for pivot angle in degrees
   public double getPivotAngleDegrees() {
     double value = m_pivotEncoder.getAbsolutePosition() -
         Constants.Intake.k_pivotEncoderOffset + 0.5;
@@ -180,9 +194,9 @@ public class Intake extends Subsystem {
     return Units.rotationsToDegrees(Helpers.modRotations(value));
   }
 
+  // Getter function for intake limit switch state
   public boolean getIntakeHasNote() {
-    // NOTE: this is intentionally inverted, because the limit switch is normally
-    // closed
+    // NOTE: this is intentionally inverted because the limit switch is normally closed
     return !m_IntakeLimitSwitch.get();
   }
 
@@ -237,7 +251,7 @@ public class Intake extends Subsystem {
   /*---------------------------------- Custom Private Functions ---------------------------------*/
   private void checkAutoTasks() {
     // If the intake is set to GROUND, and the intake has a note, and the pivot is
-    // close to it's target
+    // close to its target
     // Stop the intake and go to the SOURCE position
     if (m_periodicIO.pivot_target == PivotTarget.GROUND && getIntakeHasNote() && isPivotAtTarget()) {
       m_periodicIO.pivot_target = PivotTarget.STOW;
@@ -245,6 +259,7 @@ public class Intake extends Subsystem {
     }
   }
 
+  // Function to check if the pivot is at its target angle
   private boolean isPivotAtTarget() {
     return Math.abs(getPivotAngleDegrees() - pivotTargetToAngle(m_periodicIO.pivot_target)) < 5;
   }

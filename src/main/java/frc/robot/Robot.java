@@ -7,16 +7,11 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.autonomous.AutoChooser;
 import frc.robot.autonomous.AutoRunner;
 import frc.robot.autonomous.tasks.Task;
 import frc.robot.controls.controllers.DriverController;
-import frc.robot.controls.controllers.OperatorController;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Subsystem;
 import frc.robot.subsystems.leds.LEDs;
@@ -33,10 +28,7 @@ import frc.robot.subsystems.leds.LEDs;
 public class Robot extends TimedRobot {
   // Controller
   private final DriverController m_driverController = new DriverController(0, true, true);
-  private final OperatorController m_operatorController = new OperatorController(1, true, true);
 
-  private final SlewRateLimiter m_speedLimiter = new SlewRateLimiter(3); // 3 seconds to go from 0.0 to 1.0
-  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3); // 3 seconds to go from 0.0 to 1.0
 
   // Robot subsystems
   private List<Subsystem> m_allSubsystems = new ArrayList<>();
