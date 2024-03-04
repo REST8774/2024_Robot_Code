@@ -2,22 +2,32 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+
 
 public class Robot extends TimedRobot {
     private static final int FRONT_LEFT_CHANNEL = 5;
@@ -44,6 +54,41 @@ public class Robot extends TimedRobot {
     private double pivotangle;
     private double leverAngle = 0.48;
 
+    AHRS gyro = new AHRS(SPI.Port.kMXP);
+
+    // Locations of the wheels relative to the robot center.
+    Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
+    Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
+    Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
+    Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+
+    // Creating my kinematics object using the wheel locations.
+    MecanumDriveKinematics m_kinematics = new MecanumDriveKinematics(
+     m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
+    );
+
+
+    MecanumDriveOdometry m_odometry = new MecanumDriveOdometry(
+      m_kinematics,
+      gyro.getRotation2d(),
+      new MecanumDriveWheelPositions(
+        m_frontLeftEncoder.getDistance(), m_frontRightEncoder.getDistance(),
+        m_backLeftEncoder.getDistance(), m_backRightEncoder.getDistance()
+      ),
+      new Pose2d(5.0, 13.5, new Rotation2d())
+    );
+
+    ChassisSpeeds speeds = new ChassisSpeeds(1.0, 3.0, 1.5);
+
+    // Convert to wheel speeds
+    MecanumDriveWheelSpeeds wheelSpeeds = m_kinematics.toWheelSpeeds(speeds);
+
+    // Get the individual wheel speeds
+    double frontLeftSpeed = wheelSpeeds.frontLeftMetersPerSecond;
+    double frontRightSpeed = wheelSpeeds.frontRightMetersPerSecond;
+    double backLeftSpeed = wheelSpeeds.rearLeftMetersPerSecond;
+    double backRightSpeed = wheelSpeeds.rearRightMetersPerSecond;
+
     @Override
     public void robotInit() {
         noteSensor = new DigitalInput(8);
@@ -56,6 +101,8 @@ public class Robot extends TimedRobot {
         intakeVacuum = new CANSparkMax(INTAKE_VACUUM_CHANNEL, MotorType.kBrushless);
         sparkshooterL = new CANSparkMax(SHOOTER_L, MotorType.kBrushless);
         sparkshooterR = new CANSparkMax(SHOOTER_R, MotorType.kBrushless);
+
+        m_front
 
         driveJoystick = new Joystick(0);
         operatorController = new XboxController(1);
